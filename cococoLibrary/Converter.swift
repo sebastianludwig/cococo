@@ -59,7 +59,7 @@ public class Converter {
 		var finalOutput = Array<String?>(repeating: nil, count: fileList.count)
 		DispatchQueue.concurrentPerform(iterations: fileList.count) { (i) in
 			let filePath = String(fileList[i])
-			io.print("\(i)/\(fileList.count) \(filePath)", to: .error)
+			io.print("\(i + 1)/\(fileList.count) \(filePath)", to: .error)
 			do {
 				let output = try convertFile(filePath, archivePath: archivePath)
 				arrayWriteQueue.async(flags: .barrier) {
