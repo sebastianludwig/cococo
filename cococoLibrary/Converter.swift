@@ -57,18 +57,22 @@ public class Converter {
 		}
 		
 		var finalOutput = Array<String?>(repeating: nil, count: fileList.count)
+        let group = DispatchGroup()
 		DispatchQueue.concurrentPerform(iterations: fileList.count) { (i) in
+            group.enter()
 			let filePath = String(fileList[i])
 			io.print("\(i + 1)/\(fileList.count) \(filePath)", to: .error)
 			do {
 				let output = try convertFile(filePath, archivePath: archivePath)
 				arrayWriteQueue.async(flags: .barrier) {
 					finalOutput[i] = output
+                    group.leave()
 				}
 			} catch {
 				io.print("Conversion failed for: \(filePath)", to: .error)
 			}
 		}
+        group.wait()
         return finalOutput
 	}
 
