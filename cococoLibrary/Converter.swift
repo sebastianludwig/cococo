@@ -57,6 +57,7 @@ public class Converter {
 		}
 		
 		var finalOutput = Array<String?>(repeating: nil, count: fileList.count)
+		var lastError: Error?
 		DispatchQueue.concurrentPerform(iterations: fileList.count) { (i) in
 			let filePath = String(fileList[i])
 			io.print("\(i + 1)/\(fileList.count) \(filePath)", to: .error)
@@ -67,7 +68,11 @@ public class Converter {
 				}
 			} catch {
 				io.print("Conversion failed for \(filePath): \(error)", to: .error)
+				lastError = error
 			}
+		}
+		if let error = lastError {
+			throw error
 		}
         return finalOutput
 	}
