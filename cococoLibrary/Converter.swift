@@ -12,7 +12,7 @@ import Foundation
 public class Converter {
 	
 	private let io = IO()
-	private let arrayWriteQueue = DispatchQueue(label: "write-queue", attributes: .concurrent)
+	private let arrayWriteQueue = DispatchQueue(label: "write-queue")
 	private let xmlEscaper = XMLEscaper()
 	
 	public init() {}
@@ -57,22 +57,18 @@ public class Converter {
 		}
 		
 		var finalOutput = Array<String?>(repeating: nil, count: fileList.count)
-		let group = DispatchGroup()
 		DispatchQueue.concurrentPerform(iterations: fileList.count) { (i) in
-			group.enter()
 			let filePath = String(fileList[i])
 			io.print("\(i + 1)/\(fileList.count) \(filePath)", to: .error)
 			do {
 				let output = try convertFile(filePath, archivePath: archivePath)
-				arrayWriteQueue.async(flags: .barrier) {
+				arrayWriteQueue.sync {
 					finalOutput[i] = output
-					group.leave()
 				}
 			} catch {
-				io.print("Conversion failed for: \(filePath)", to: .error)
+				io.print("Conversion failed for \(filePath): \(error)", to: .error)
 			}
 		}
-		group.wait()
         return finalOutput
 	}
 
